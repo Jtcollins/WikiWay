@@ -44,7 +44,6 @@ public class WikiGraph
 	private GcsService service;
 	private GcsFilename srcFile;
 	
-	public Object[][] t;
 
 	private String graphFile;
 	//private String finalFile;

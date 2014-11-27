@@ -77,18 +77,6 @@ public class ResultXML {
 		String finalFiletxt = "";
 		currPages = pageNames.replaceAll(" ", "_");
 		try {
-			String your_os = System.getProperty("os.name").toLowerCase();
-			if (your_os.indexOf("win") >= 0) {
-				finalFileXML = workingDir + "\\" + this.xMLName;
-				finalFiletxt = workingDir + "\\" + this.outputName;
-			} else if (your_os.indexOf("nix") >= 0
-					|| your_os.indexOf("nux") >= 0) {
-				finalFileXML = workingDir + "/" + this.xMLName;
-				finalFiletxt = workingDir + "/" + this.outputName;
-			} else {
-				finalFileXML = workingDir + "/" + this.xMLName;
-				finalFiletxt = workingDir + "/" + this.outputName;
-			}
 
 			System.out.println("Final filepath : " + finalFileXML);
 
