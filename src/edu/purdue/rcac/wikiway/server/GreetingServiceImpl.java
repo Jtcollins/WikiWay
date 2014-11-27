@@ -3,6 +3,7 @@ package edu.purdue.rcac.wikiway.server;
 import java.io.File;
 import java.util.ArrayList;
 
+
 import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
@@ -73,8 +74,8 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		status = "Compiling Graph";
 		WikiGraph graph = new WikiGraph(gcsService, xml.getOutputLoc());
 		status = "Preparing Analytics";
-		return graph.getOutputLocation();
-		//return status;
+		//return graph.getOutputLocation();
+		return status;
 	}
 
 	public String getStatus() {
