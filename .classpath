@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="test-classes" path="test"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/appengine-gcs-client-0.4.2.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/gson-2.3.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/guava-18.0.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/guava-gwt-18.0.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/java-json.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/jersey-client-1.7-2.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/jersey-client-1.7.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/joda-time-2.0.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/soda-api-java-0.6.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/com.sun.jersey.jersey-core-1.4.0.jar"/>
+	<classpathentry kind="lib" path="/Users/jessecollins90/Downloads/jersey.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
