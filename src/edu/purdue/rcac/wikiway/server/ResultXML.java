@@ -61,7 +61,7 @@ public class ResultXML {
 	}
 
 	public ResultXML(String pageNames, GcsService service) {
-		this(pageNames, service, true, "processorOutput");
+		this(pageNames, service, true, "xmlout");
 	}
 
 	/**
@@ -72,15 +72,10 @@ public class ResultXML {
 	 * @param fileName output filename
 	 */
 	public ResultXML(String pageNames, GcsService service, boolean history, String fileName) {
-		workingDir = System.getProperty("user.dir");
 		this.xMLName = fileName + ".xml";
-		this.outputName = fileName + ".txt";
-		String finalFileXML = "";
-		String finalFiletxt = "";
 		currPages = pageNames.replaceAll(" ", "_");
 		try {
 
-			System.out.println("Final filepath : " + finalFileXML);
 
 			if (history) {
 				exportPage = new URL(
@@ -92,12 +87,12 @@ public class ResultXML {
 								+ currPages);
 			}
 			
+			
 
 			// Path path = Paths.get(finalFileXML);
 			// outputXML = new File("/" + this.xMLName);
-
-			//TODO: mend to have individual xml names
-			GcsFilename xName = new GcsFilename(BUCKET_NAME, "xmlout.xml");
+			System.out.println("Exportpage: " + exportPage + " xmlName: " + xMLName);
+			this.xName = new GcsFilename(BUCKET_NAME, xMLName);
 	
 			
 			//Declares the GCS service
@@ -108,7 +103,7 @@ public class ResultXML {
 			GcsFileOptions options = optionsBuild.build();
 			
 			
-			GcsOutputChannel outputChannel = gcsService.createOrReplace(xName,
+			GcsOutputChannel outputChannel = gcsService.createOrReplace(this.xName,
 					options);
 			ObjectOutputStream oout = new ObjectOutputStream(
 					Channels.newOutputStream(outputChannel));
@@ -121,12 +116,13 @@ public class ResultXML {
 			while ((nRead = is.read(data, 0, data.length)) != -1) {
 				oout.write(data, 0, nRead);
 			}
-			//oout.flush();
+			oout.flush();
 			oout.close();
-			System.out.println("Download Complete");
+			System.out.println("Download Complete "+ this.xName.getObjectName());
 
 			//Date date = new Date();
 			//DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+			
 			
 			
 			/*
@@ -140,7 +136,6 @@ public class ResultXML {
 				tXt = (File) bin.;
 			}
 			*/
-			System.out.println("Parsing Complete " + xName.getObjectName());
 
 		} catch (Exception e) {
 			// Auto-generated catch block

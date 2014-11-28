@@ -217,7 +217,7 @@ public class TalkProcessor {
 
 				}
 			}
-
+			oout.flush();
 			oout.close();
 		}
 	}
