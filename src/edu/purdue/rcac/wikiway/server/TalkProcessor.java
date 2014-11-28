@@ -55,7 +55,7 @@ public class TalkProcessor {
 	private static final String TIMESTAMP_TAG = "timestamp";
 	private static final String TEXT_TAG = "text";
 	private static final String USERNAME_TAG = "username";
-	//public static final String BUCKET_NAME = "process_output";
+	public static final String BUCKET_NAME = "processbucket";
 
 	private PageInfo page;
 	
@@ -63,14 +63,20 @@ public class TalkProcessor {
 	private GcsOutputChannel outputChannel;
 	private ObjectOutputStream oout;
 
-	private String outputFile = "process";
+	private String outputFile = "process.txt";
 
 	public GcsFilename getOutputFile() {
 		return outFile;
 	}
 	
+	//Input needs to be a txt filename
 	public void setOutputFile(String file) {
-		outputFile = "process";
+		if(file.contains(".txt"))	{
+			outputFile = file;
+		}
+		else	{
+			System.out.println("SetOutputFile not given correct string, string: " + file);
+		}
 	}
 
 
@@ -144,7 +150,7 @@ public class TalkProcessor {
 			Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 			GcsFileOptions options = optionsBuild.build();
 			
-			outFile = new GcsFilename("process_output", outputFile);
+			outFile = new GcsFilename(BUCKET_NAME, outputFile);
 			outputChannel = gcsService.createOrReplace(outFile,
 					options);
 

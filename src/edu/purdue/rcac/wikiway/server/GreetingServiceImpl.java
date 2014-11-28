@@ -1,8 +1,8 @@
 package edu.purdue.rcac.wikiway.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-
 
 import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsService;
@@ -67,15 +67,34 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	}
 
 	public String makeTxt(String pageName) {
-		final GcsService gcsService = GcsServiceFactory
-				.createGcsService(RetryParams.getDefaultInstance());
-		status = "Downloading Data from Wikipedia";
-		ResultXML xml = new ResultXML(pageName, gcsService);
-		status = "Compiling Graph";
-		WikiGraph graph = new WikiGraph(gcsService, xml.getOutputLoc());
-		status = "Preparing Analytics";
-		//return graph.getOutputLocation();
-		return status;
+		try {
+			final GcsService gcsService = GcsServiceFactory
+					.createGcsService(RetryParams.getDefaultInstance());
+			status = "Downloading Data from Wikipedia";
+			System.out.println(status);
+			ResultXML xml = new ResultXML(pageName, gcsService);
+			TalkProcessor tp = new TalkProcessor();
+			String outputName = "talkoutput" + ".txt";
+			tp.setOutputFile(outputName);
+			tp.process(xml.getOutput(), gcsService);
+			gcsService.delete(xml.getOutput());
+			status = "Compiling Graph";
+			System.out.println(status);
+			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile().getObjectName());
+			gcsService.delete(tp.getOutputFile());
+			status = "Preparing Analytics";
+			System.out.println(status);
+			return graph.getOutputLocation();
+			//return status;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("makeTxt failed");
+		return null;
 	}
 
 	public String getStatus() {

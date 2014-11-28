@@ -43,6 +43,8 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 
 public class ResultXML {
+	
+	public static final String BUCKET_NAME = "xmlbucket";
 
 	public URL exportPage;
 	public String currPages;
@@ -54,8 +56,8 @@ public class ResultXML {
 	public String outputName;
 	private String outputLocation;
 	
-	public String getOutputLoc()	{
-		return outputLocation;
+	public GcsFilename getOutput()	{
+		return xName;
 	}
 
 	public ResultXML(String pageNames, GcsService service) {
@@ -95,7 +97,7 @@ public class ResultXML {
 			// outputXML = new File("/" + this.xMLName);
 
 			//TODO: mend to have individual xml names
-			GcsFilename xName = new GcsFilename("outputxml", "xmlout.xml");
+			GcsFilename xName = new GcsFilename(BUCKET_NAME, "xmlout.xml");
 	
 			
 			//Declares the GCS service
@@ -126,12 +128,6 @@ public class ResultXML {
 			//Date date = new Date();
 			//DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 			
-			TalkProcessor tp = new TalkProcessor();
-			this.outputName = "talkoutput" + ".txt";
-			tp.setOutputFile("talkoutput" + ".txt");
-			tp.process(xName, gcsService);
-			gcsService.delete(xName);
-			outputLocation = tp.getOutputFile().getObjectName();
 			
 			/*
 			GcsInputChannel readChannel = gcsService
@@ -144,7 +140,7 @@ public class ResultXML {
 				tXt = (File) bin.;
 			}
 			*/
-			System.out.println("Parsing Complete :) " + outputLocation);
+			System.out.println("Parsing Complete " + xName.getObjectName());
 
 		} catch (Exception e) {
 			// Auto-generated catch block

@@ -37,7 +37,7 @@ public class WikiGraph
 {
 
     //private static char file_separator;
-	public static final String BUCKET_NAME = "graph_output";
+	public static final String BUCKET_NAME = "graphbucket";
     
 	private GcsOutputChannel outputChannel;
 	private ObjectOutputStream oout;
@@ -61,7 +61,7 @@ public class WikiGraph
     public WikiGraph(GcsService gcsService, String sourceFile)	{
     	System.out.println("Graphing now");
     	service = gcsService;
-    	this.srcFile = new GcsFilename(BUCKET_NAME,sourceFile);
+    	this.srcFile = new GcsFilename(TalkProcessor.BUCKET_NAME, sourceFile);
     	
     	ArrayList<String> page_threads = new ArrayList<String>();
         ArrayList<String> archive_threads = new ArrayList<String>();
