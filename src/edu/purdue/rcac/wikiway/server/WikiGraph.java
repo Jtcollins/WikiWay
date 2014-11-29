@@ -51,17 +51,17 @@ public class WikiGraph
     
     public String getOutputLocation() {
 		// TODO Auto-generated method stub
-		return graphFile;
+		return graphFile + ".txt";
 	}
 	
 	public void setGraphFile(String file) {
 		graphFile = file;
 	}
 
-    public WikiGraph(GcsService gcsService, String sourceFile)	{
+    public WikiGraph(GcsService gcsService, GcsFilename sourceFile)	{
     	System.out.println("Graphing now");
     	service = gcsService;
-    	this.srcFile = new GcsFilename(TalkProcessor.BUCKET_NAME, sourceFile);
+    	this.srcFile = sourceFile;
     	
     	ArrayList<String> page_threads = new ArrayList<String>();
         ArrayList<String> archive_threads = new ArrayList<String>();

@@ -240,7 +240,7 @@ public class WikiWay implements EntryPoint {
 
 			public void onClick(ClickEvent event) {
 				//links to the final completed graph.
-				Window.open("http://storage.googleapis.com/processbucket/" + outputLocation, "_self", "enabled");
+				Window.open("http://storage.googleapis.com/graphbucket/" + outputLocation, "_self", "enabled");
 				
 			}
 			

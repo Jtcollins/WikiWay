@@ -71,20 +71,22 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			final GcsService gcsService = GcsServiceFactory
 					.createGcsService(RetryParams.getDefaultInstance());
 			status = "Downloading Data from Wikipedia";
+			String outputName = "talkoutput" + ".txt";
 			System.out.println(status + " pageName " + pageName);
+			//GcsFilename deletion = new GcsFilename("processbucket" ,outputName);
+			//gcsService.delete(deletion);
 			ResultXML xml = new ResultXML(pageName, gcsService);
 			TalkProcessor tp = new TalkProcessor();
-			String outputName = "talkoutput" + ".txt";
 			tp.setOutputFile(outputName);
 			tp.process(xml.getOutput(), gcsService);
 			gcsService.delete(xml.getOutput());
 			status = "Compiling Graph";
 			System.out.println(status);
-			//WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile().getObjectName());
+			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile());
 			//gcsService.delete(tp.getOutputFile());
-			//status = "Preparing Analytics";
+			status = "Preparing Analytics";
 			System.out.println(status);
-			return tp.getOutputFile().getObjectName();
+			return graph.getOutputLocation();
 			//return status;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
