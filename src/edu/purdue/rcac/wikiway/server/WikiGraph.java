@@ -124,25 +124,25 @@ public class WikiGraph
 		            if(all_interventions.isEmpty())
 		            {
 		                // write page_threads
-		                writePageThread_File(page_threads,"page_threads", "page_threads",srcFile);
+		                writePageThread_File(page_threads,"page_threads",srcFile);
 		                // write archive_pages
-		                writePageThread_File(archive_pages, "archive_pages", "archive", srcFile);
+		                writePageThread_File(archive_pages, "archive_pages", srcFile);
 		                // write archive_threads
-		                writePageThread_File(archive_threads, "archive_threads", "archive", srcFile);
+		                writePageThread_File(archive_threads, "archive_threads", srcFile);
 		
 		                // prepare and write thread networks
 		                thread_graph = buildGraph(thread_interventions);
-		                writeUCINET_File(thread_graph, srcFile, "threads1", current_thread, thread_interventions);
+		                writeUCINET_File(thread_graph, srcFile, current_thread, thread_interventions);
 		
 		                // prepare and write page networks
 		                page_interventions.addAll(thread_interventions);
 		                combineNetworks(page_graph,thread_graph);
-		                writeUCINET_File(page_graph, srcFile, "talkpages", current_page, page_interventions);
+		                writeUCINET_File(page_graph, srcFile, current_page, page_interventions);
 		                
 		                // prepare and write archive networks
 		                archive_interventions.addAll(page_interventions);
 		                combineNetworks(archive_graph,page_graph);
-		                writeUCINET_File(archive_graph, srcFile, "archives", "archive", archive_interventions);
+		                writeUCINET_File(archive_graph, srcFile, "archive", archive_interventions);
 		
 		                current_page = null;
 		                current_thread = null;
@@ -174,7 +174,7 @@ public class WikiGraph
 	            if(in_page.compareTo(current_page) != 0)
 	            {
 	                try {
-						writePageThread_File(page_threads,"page_threads" ,current_page, srcFile);
+						writePageThread_File(page_threads, current_page, srcFile);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -192,7 +192,7 @@ public class WikiGraph
 	
 	                // write thread UCINET file
 	                try {
-						writeUCINET_File(thread_graph, srcFile, "current_threads",  current_thread, thread_interventions);
+						writeUCINET_File(thread_graph, srcFile, current_thread, thread_interventions);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -215,7 +215,7 @@ public class WikiGraph
 	            {
 	                // prepare page file
 	                try {
-						writeUCINET_File(page_graph, srcFile , "current_pages", current_page ,page_interventions);
+						writeUCINET_File(page_graph, srcFile , current_page ,page_interventions);
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -359,14 +359,14 @@ public class WikiGraph
         return intermediate;
 
     }
-    private void writeUCINET_File(DirectedSparseGraph<String,Edge> graph, GcsFilename srcFile, String bucket, String destFile, ArrayList<InterventionAttributes> interventions) throws IOException
+    private void writeUCINET_File(DirectedSparseGraph<String,Edge> graph, GcsFilename srcFile, String destFile, ArrayList<InterventionAttributes> interventions) throws IOException
     {
     	
         //BufferedWriter out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_location) + ".txt"));
         Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 		GcsFileOptions options = optionsBuild.build();
 		
-		GcsFilename outFile = new GcsFilename(bucket, destFile + ".txt");
+		GcsFilename outFile = new GcsFilename(BUCKET_NAME, destFile + ".txt");
 
 		outputChannel = service.createOrReplace(outFile,
 				options);
@@ -438,7 +438,7 @@ public class WikiGraph
 
         oout.close();
 
-        outFile = new GcsFilename(bucket, graphFile+"_attributes.txt");
+        outFile = new GcsFilename(BUCKET_NAME, graphFile+"_attributes.txt");
 
 		outputChannel = service.createOrReplace(outFile,
 				options);
@@ -460,14 +460,14 @@ public class WikiGraph
 
         
     }
-    private void writePageThread_File(ArrayList<String> page_threads, String bucket, String current_page, GcsFilename srcName) throws IOException
+    private void writePageThread_File(ArrayList<String> page_threads, String current_page, GcsFilename srcName) throws IOException
     {
 
         //BufferedWriter out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_page) + "_threads.txt"));
     	Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 		GcsFileOptions options = optionsBuild.build();
 		
-		GcsFilename outFile = new GcsFilename(bucket, fileNameSanitize(current_page) + "_threads.txt");
+		GcsFilename outFile = new GcsFilename(BUCKET_NAME, fileNameSanitize(current_page) + "_threads.txt");
 
 		outputChannel = service.createOrReplace(outFile,
 				options);

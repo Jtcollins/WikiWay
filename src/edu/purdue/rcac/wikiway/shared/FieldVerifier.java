@@ -1,5 +1,7 @@
 package edu.purdue.rcac.wikiway.shared;
 
+import java.util.Hashtable;
+
 /**
  * <p>
  * FieldVerifier validates that the name the user enters is valid.
@@ -21,7 +23,9 @@ package edu.purdue.rcac.wikiway.shared;
  * </p>
  */
 public class FieldVerifier {
-
+	
+	public static int counter = 0;
+	//private static Hashtable<String, Integer> hTable;
 	/**
 	 * Verifies that the specified name is valid for our service.
 	 * 
@@ -37,6 +41,13 @@ public class FieldVerifier {
 		if (name == null) {
 			return false;
 		}
+		counter++;
+		//hTable.put(name, counter);
 		return name.length() > 3;
 	}
+	
+	/*
+	public static int processNumber(String page)	{
+		return hTable.get(page);
+	}*/
 }
