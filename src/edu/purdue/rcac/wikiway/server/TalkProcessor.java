@@ -63,7 +63,7 @@ public class TalkProcessor {
 	private GcsOutputChannel outputChannel;
 	private ObjectOutputStream oout;
 
-	private String outputFile = "process.txt";
+	private String outputFile = "talkoutput.txt";
 
 	public GcsFilename getOutputFile() {
 		return outFile;

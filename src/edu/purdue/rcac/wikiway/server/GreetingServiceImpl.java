@@ -82,7 +82,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			gcsService.delete(xml.getOutput());
 			status = "Compiling Graph";
 			System.out.println(status);
-			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile());
+			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile(), "graph");
 			//gcsService.delete(tp.getOutputFile());
 			status = "Preparing Analytics";
 			System.out.println(status);

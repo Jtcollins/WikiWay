@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import edu.purdue.rcac.wikiway.server.*;
 import edu.purdue.rcac.wikiway.shared.FieldVerifier;
 
+
 //import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -77,31 +79,39 @@ public class WikiWay implements EntryPoint {
 		searchField.setFocus(true);
 		searchField.selectAll();
 
-		// Create the popup dialog box
+		// Create the search dialog box
 		final DialogBox dialogBox = new DialogBox();
 		dialogBox.setText("Search Results");
 		dialogBox.setAnimationEnabled(true);
+		dialogBox.setGlassEnabled(true);
 		final Button closeButton = new Button("Close");
 		// We can set the id of a widget by accessing its Element
 		closeButton.getElement().setId("closeButton");
 		final Label textToServerLabel = new Label();
 		final HTML serverResponseLabel = new HTML();
 		VerticalPanel dialogVPanel = new VerticalPanel();
+		SplitLayoutPanel t = new SplitLayoutPanel();
 		dialogVPanel.addStyleName("dialogVPanel");
-		dialogVPanel.add(new HTML("<b>Searching for:</b>"));
-		dialogVPanel.add(textToServerLabel);
-		dialogVPanel.add(new HTML("<br><b>Results:</b>"));
-		lb.setVisibleItemCount(1);
+		//dialogVPanel.add(new HTML("<br><b>Results:</b>"));
+		lb.setVisibleItemCount(10);
+		lb.setSize("290px", "210px");
 		dialogVPanel.add(lb);
-		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
+		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(compileButton);
 		downloadButton.setVisible(false);
 		dialogVPanel.add(downloadButton);
-		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(closeButton);
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
-		dialogVPanel.add(graphAttributes);
 		dialogBox.setWidget(dialogVPanel);
+		
+		//Create the Progress dialog box
+		final DialogBox progressBox = new DialogBox();
+		final Button cancelButton = new Button("Cancel");
+		
+		
+		//Create the Result Dialog box
+		final DialogBox resultsBox = new DialogBox();
+		//dialogVPanel.add(graphAttributes);
 		
 		compileButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -120,6 +130,7 @@ public class WikiWay implements EntryPoint {
 					public void onSuccess(String output) {
 						// TODO Auto-generated method stub
 						compileButton.setVisible(false);
+						dialogBox.setVisible(false);
 						outputLocation = output;
 						downloadButton.setVisible(true);
 						downloadButton.setFocus(true);
@@ -193,7 +204,7 @@ public class WikiWay implements EntryPoint {
 							}
 
 							public void onSuccess(String result) {
-								dialogBox.setText("Search");
+								dialogBox.setText("Search Results");
 								serverResponseLabel
 										.removeStyleName("serverResponseLabelError");
 								serverResponseLabel.setHTML(result);

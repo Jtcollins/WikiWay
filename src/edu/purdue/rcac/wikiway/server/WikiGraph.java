@@ -58,8 +58,9 @@ public class WikiGraph
 		graphFile = file;
 	}
 
-    public WikiGraph(GcsService gcsService, GcsFilename sourceFile)	{
+    public WikiGraph(GcsService gcsService, GcsFilename sourceFile, String graphName)	{
     	System.out.println("Graphing now");
+    	this.graphFile = graphName;
     	service = gcsService;
     	this.srcFile = sourceFile;
     	
@@ -124,11 +125,11 @@ public class WikiGraph
 		            if(all_interventions.isEmpty())
 		            {
 		                // write page_threads
-		                writePageThread_File(page_threads,"page_threads",srcFile);
+		                writePageThread_File(page_threads,"page",srcFile);
 		                // write archive_pages
 		                writePageThread_File(archive_pages, "archive_pages", srcFile);
 		                // write archive_threads
-		                writePageThread_File(archive_threads, "archive_threads", srcFile);
+		                writePageThread_File(archive_threads, "archive", srcFile);
 		
 		                // prepare and write thread networks
 		                thread_graph = buildGraph(thread_interventions);
