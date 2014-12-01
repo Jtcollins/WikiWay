@@ -57,8 +57,11 @@ public class WikiWay implements EntryPoint {
 		final Button downloadButton = new Button("Download");
 		final TextBox searchField = new TextBox();
 		final TextBox status = new TextBox();
+		final TextBox graphAttributes = new TextBox();
 		status.setVisible(false);
+		graphAttributes.setVisible(false);
 		searchField.setText("Search Parameters");
+		graphAttributes.setText("Nodes: \nTop Contributor: \n");
 		final Label errorLabel = new Label();
 
 		// We can add style names to widgets
@@ -96,6 +99,8 @@ public class WikiWay implements EntryPoint {
 		dialogVPanel.add(downloadButton);
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(closeButton);
+		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
+		dialogVPanel.add(graphAttributes);
 		dialogBox.setWidget(dialogVPanel);
 		
 		compileButton.addClickHandler(new ClickHandler() {
@@ -118,6 +123,7 @@ public class WikiWay implements EntryPoint {
 						outputLocation = output;
 						downloadButton.setVisible(true);
 						downloadButton.setFocus(true);
+						graphAttributes.setVisible(true);
 						
 					}
 
