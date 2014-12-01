@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
+import com.google.appengine.tools.cloudstorage.ListResult;
 import com.google.appengine.tools.cloudstorage.RetryParams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -66,13 +67,15 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 				.replaceAll(">", "&gt;");
 	}
 
-	public String makeTxt(String pageName) {
+	public String[] makeTxt(String pageName) {
 		try {
 			final GcsService gcsService = GcsServiceFactory
 					.createGcsService(RetryParams.getDefaultInstance());
 			status = "Downloading Data from Wikipedia";
 			String outputName = "talkoutput" + ".txt";
 			System.out.println(status + " pageName " + pageName);
+			//ListResult bucketList = new list(WikiGraph.BUCKET_NAME, );
+			pageName.replaceAll(" ", "");
 			//GcsFilename deletion = new GcsFilename("processbucket" ,outputName);
 			//gcsService.delete(deletion);
 			ResultXML xml = new ResultXML(pageName, gcsService);
@@ -82,10 +85,11 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			gcsService.delete(xml.getOutput());
 			status = "Compiling Graph";
 			System.out.println(status);
-			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile(), "graph");
+			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile(), pageName);
 			//gcsService.delete(tp.getOutputFile());
 			status = "Preparing Analytics";
 			System.out.println(status);
+			gcsService.delete(tp.getOutputFile());
 			return graph.getOutputLocation();
 			//return status;
 		} catch (IOException e) {

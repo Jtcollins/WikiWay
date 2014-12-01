@@ -1,10 +1,10 @@
 package edu.purdue.rcac.wikiway.client;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import edu.purdue.rcac.wikiway.server.*;
 import edu.purdue.rcac.wikiway.shared.FieldVerifier;
+
 
 
 //import com.google.appengine.tools.cloudstorage.GcsFilename;
@@ -23,7 +23,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -33,7 +32,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class WikiWay implements EntryPoint {
 	
 	public ListBox lb = new ListBox();
-	public String outputLocation;
+	public String[] outputLocation;
 	//public File outText;
 	
 	/**
@@ -59,11 +58,10 @@ public class WikiWay implements EntryPoint {
 		final Button downloadButton = new Button("Download");
 		final TextBox searchField = new TextBox();
 		final TextBox status = new TextBox();
-		final TextBox graphAttributes = new TextBox();
+		final TextBox nodes = new TextBox();
+		final TextBox topC = new TextBox();
 		status.setVisible(false);
-		graphAttributes.setVisible(false);
 		searchField.setText("Search Parameters");
-		graphAttributes.setText("Nodes: \nTop Contributor: \n");
 		final Label errorLabel = new Label();
 
 		// We can add style names to widgets
@@ -90,7 +88,6 @@ public class WikiWay implements EntryPoint {
 		final Label textToServerLabel = new Label();
 		final HTML serverResponseLabel = new HTML();
 		VerticalPanel dialogVPanel = new VerticalPanel();
-		SplitLayoutPanel t = new SplitLayoutPanel();
 		dialogVPanel.addStyleName("dialogVPanel");
 		//dialogVPanel.add(new HTML("<br><b>Results:</b>"));
 		lb.setVisibleItemCount(10);
@@ -99,19 +96,31 @@ public class WikiWay implements EntryPoint {
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(compileButton);
 		downloadButton.setVisible(false);
-		dialogVPanel.add(downloadButton);
 		dialogVPanel.add(closeButton);
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
 		dialogBox.setWidget(dialogVPanel);
 		
 		//Create the Progress dialog box
 		final DialogBox progressBox = new DialogBox();
+		VerticalPanel progressVPanel = new VerticalPanel();
 		final Button cancelButton = new Button("Cancel");
+		progressVPanel.add(status);
+		progressVPanel.add(cancelButton);
+		progressBox.setWidget(progressVPanel);
 		
 		
 		//Create the Result Dialog box
 		final DialogBox resultsBox = new DialogBox();
-		//dialogVPanel.add(graphAttributes);
+		VerticalPanel resultVPanel = new VerticalPanel();
+		resultsBox.setText("Results");
+		resultVPanel.add(downloadButton);
+		nodes.setText("Nodes: ");
+		topC.setText("Top Contributor: ");
+		final Button resetButton = new Button("Close");
+		resultVPanel.add(nodes);
+		resultVPanel.add(topC);
+		resultVPanel.add(resetButton);
+		resultsBox.setWidget(resultVPanel);
 		
 		compileButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -119,22 +128,26 @@ public class WikiWay implements EntryPoint {
 				String selected = lb.getValue(select);
 				compileButton.setEnabled(false);
 				status.setText("Compiling...");
+				dialogBox.hide();
+				progressBox.setVisible(true);
+				progressBox.center();
 				status.setVisible(true);
-				greetingService.makeTxt(selected, new AsyncCallback<String>()	{
+				greetingService.makeTxt(selected, new AsyncCallback<String[]>()	{
 
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
 						
 					}
 
-					public void onSuccess(String output) {
+					public void onSuccess(String[] output) {
 						// TODO Auto-generated method stub
+						progressBox.hide();
+						resultsBox.center();
 						compileButton.setVisible(false);
-						dialogBox.setVisible(false);
 						outputLocation = output;
 						downloadButton.setVisible(true);
 						downloadButton.setFocus(true);
-						graphAttributes.setVisible(true);
+						topC.setVisible(true);
 						
 					}
 
@@ -148,11 +161,22 @@ public class WikiWay implements EntryPoint {
 		closeButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				dialogBox.hide();
+				progressBox.setVisible(true);
+				searchButton.setEnabled(true);
+				downloadButton.setVisible(false);
+				cancelButton.setFocus(true);
+			}
+		});
+		
+		resetButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				resultsBox.hide();
 				searchButton.setEnabled(true);
 				downloadButton.setVisible(false);
 				compileButton.setEnabled(true);
 				compileButton.setVisible(true);
 				searchButton.setFocus(true);
+				searchField.setText("Search Parameters");
 			}
 		});
 
@@ -252,12 +276,14 @@ public class WikiWay implements EntryPoint {
 
 			public void onKeyUp(KeyUpEvent event) {
 				// TODO Auto-generated method stub
-				
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+					Window.open("http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1], "_self", "enabled");
+				}
 			}
 
 			public void onClick(ClickEvent event) {
 				//links to the final completed graph.
-				Window.open("http://storage.googleapis.com/graphbucket/" + outputLocation, "_self", "enabled");
+				Window.open("http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1], "_self", "enabled");
 				
 			}
 			
@@ -268,6 +294,7 @@ public class WikiWay implements EntryPoint {
 		CompHandler comphandle = new CompHandler();
 		DownHandler downhandle = new DownHandler();
 		searchButton.addClickHandler(handler);
+		
 		compileButton.addClickHandler(comphandle);
 		downloadButton.addClickHandler(downhandle);
 		searchField.addKeyUpHandler(handler);

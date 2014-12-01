@@ -124,6 +124,7 @@ java.lang.StackTraceElement, true, true, false, false, java.lang.StackTraceEleme
 [Ljava.lang.StackTraceElement;, true, true, false, false, [Ljava.lang.StackTraceElement;/3867167983, 3867167983
 java.lang.String, true, true, true, true, java.lang.String/2004016611, 2004016611
 java.lang.StringIndexOutOfBoundsException, true, true, false, false, java.lang.StringIndexOutOfBoundsException/500777603, 500777603
+[Ljava.lang.String;, true, true, false, false, [Ljava.lang.String;/2600011424, 2600011424
 java.lang.Throwable, true, true, true, false, java.lang.Throwable/2953622131, 2953622131
 java.lang.UnsupportedOperationException, true, true, false, false, java.lang.UnsupportedOperationException/3744010015, 3744010015
 java.lang.Void, true, true, false, false, java.lang.Void/2139725816, 2139725816

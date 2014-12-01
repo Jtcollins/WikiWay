@@ -12,6 +12,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GreetingService extends RemoteService {
 	String greetServer(String name);
 	ArrayList getResults();
-	String makeTxt(String pageName);
+	String[] makeTxt(String pageName);
 }
 

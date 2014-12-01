@@ -46,12 +46,11 @@ public class WikiGraph
 	
 
 	private String graphFile;
-	//private String finalFile;
+	private String[] finalFile;
 	//private String bucketName;
     
-    public String getOutputLocation() {
-		// TODO Auto-generated method stub
-		return graphFile + ".txt";
+    public String[] getOutputLocation() {
+		return finalFile;
 	}
 	
 	public void setGraphFile(String file) {
@@ -59,8 +58,11 @@ public class WikiGraph
 	}
 
     public WikiGraph(GcsService gcsService, GcsFilename sourceFile, String graphName)	{
-    	System.out.println("Graphing now");
-    	this.graphFile = graphName;
+    	System.out.println("Graphing now " + sourceFile.getObjectName());
+    	//this.graphFile = graphName;
+    	this.finalFile = new String[2];
+    	this.finalFile[0] = BUCKET_NAME;
+        this.finalFile[1] = graphName+ ".txt";
     	service = gcsService;
     	this.srcFile = sourceFile;
     	
@@ -73,7 +75,7 @@ public class WikiGraph
         String in_line;
         String current_thread = null;
         String in_thread;
-        String current_page = null;
+        String current_page = graphName;
         String in_page;
 
         String[] line_fields;
@@ -104,6 +106,7 @@ public class WikiGraph
 	        try {
 				while( (in_line = in_file.readLine()) != null) // read the verbose file into a Double-ended queue
 				{
+					//System.out.println(in_line);
 				    line_fields = in_line.split(",");
 				    if(line_fields[5].contains("M"))
 				    {
@@ -139,6 +142,7 @@ public class WikiGraph
 		                page_interventions.addAll(thread_interventions);
 		                combineNetworks(page_graph,thread_graph);
 		                writeUCINET_File(page_graph, srcFile, current_page, page_interventions);
+		                
 		                
 		                // prepare and write archive networks
 		                archive_interventions.addAll(page_interventions);
