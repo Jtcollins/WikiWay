@@ -47,6 +47,7 @@ public class WikiGraph
 
 	private String graphFile;
 	private String[] finalFile;
+	private Object[] topUser;
 	//private String bucketName;
     
     public String[] getOutputLocation() {
@@ -103,10 +104,23 @@ public class WikiGraph
         	
         }
         
+        
 	        try {
+	        	Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
+	    		GcsFileOptions options = optionsBuild.build();
+	    		
+	    		GcsFilename testFile = new GcsFilename(BUCKET_NAME, "test" + ".txt");
+
+	    		GcsOutputChannel testoutChannel = service.createOrReplace(testFile,
+	    				options);
+
+	    		ObjectOutputStream tout = new ObjectOutputStream(
+	    				Channels.newOutputStream(testoutChannel));
+	        	
 				while( (in_line = in_file.readLine()) != null) // read the verbose file into a Double-ended queue
 				{
 					//System.out.println(in_line);
+					tout.writeChars(in_line);
 				    line_fields = in_line.split(",");
 				    if(line_fields[5].contains("M"))
 				    {
@@ -115,6 +129,7 @@ public class WikiGraph
 				    all_interventions.addLast(new InterventionAttributes(line_fields[0],line_fields[1],line_fields[2],Integer.parseInt(line_fields[3]),Integer.parseInt(line_fields[4]),Long.valueOf(line_fields[5])));
 				}
 				in_file.close();
+				tout.close();
 			} catch (NumberFormatException e1) {
 				e1.printStackTrace();
 			} catch (IOException e1) {
@@ -199,7 +214,6 @@ public class WikiGraph
 	                try {
 						writeUCINET_File(thread_graph, srcFile, current_thread, thread_interventions);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 	                
