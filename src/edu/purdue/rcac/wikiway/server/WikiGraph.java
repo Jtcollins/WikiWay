@@ -24,6 +24,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.zip.ZipOutputStream;
 
 import com.google.appengine.tools.cloudstorage.GcsFileOptions;
 import com.google.appengine.tools.cloudstorage.GcsFilename;
@@ -76,7 +77,7 @@ public class WikiGraph
         String in_line;
         String current_thread = null;
         String in_thread;
-        String current_page = graphName;
+        String current_page = null;
         String in_page;
 
         String[] line_fields;
@@ -96,16 +97,10 @@ public class WikiGraph
         GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(
 				srcFile, 0, 1024 * 1024);
         
-        try (ObjectInputStream oin = new ObjectInputStream( Channels.newInputStream(readChannel))) {
-        
-        in_file = new BufferedReader(new InputStreamReader((InputStream) oin));
-        
-        } catch (Exception e)	{
-        	
-        }
-        
-        
 	        try {
+	        	ObjectInputStream oin = new ObjectInputStream( Channels.newInputStream(readChannel));
+	        	in_file = new BufferedReader(new InputStreamReader((InputStream) oin));
+	        	
 	        	Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 	    		GcsFileOptions options = optionsBuild.build();
 	    		
@@ -116,11 +111,9 @@ public class WikiGraph
 
 	    		ObjectOutputStream tout = new ObjectOutputStream(
 	    				Channels.newOutputStream(testoutChannel));
-	        	
 				while( (in_line = in_file.readLine()) != null) // read the verbose file into a Double-ended queue
 				{
 					//System.out.println(in_line);
-					tout.writeChars(in_line);
 				    line_fields = in_line.split(",");
 				    if(line_fields[5].contains("M"))
 				    {
@@ -129,6 +122,7 @@ public class WikiGraph
 				    all_interventions.addLast(new InterventionAttributes(line_fields[0],line_fields[1],line_fields[2],Integer.parseInt(line_fields[3]),Integer.parseInt(line_fields[4]),Long.valueOf(line_fields[5])));
 				}
 				in_file.close();
+				tout.flush();
 				tout.close();
 			} catch (NumberFormatException e1) {
 				e1.printStackTrace();
@@ -136,50 +130,160 @@ public class WikiGraph
 				e1.printStackTrace();
 			}
 	        
+//	        
+//	        while(true)
+//	        {
+//	        	try{
+//		            if(all_interventions.isEmpty())
+//		            {
+//		                // write page_threads
+//		                writePageThread_File(page_threads,"page",srcFile);
+//		                // write archive_pages
+//		                writePageThread_File(archive_pages, "archive_pages", srcFile);
+//		                // write archive_threads
+//		                writePageThread_File(archive_threads, "archive", srcFile);
+//		
+//		                // prepare and write thread networks
+//		                thread_graph = buildGraph(thread_interventions);
+//		                writeUCINET_File(thread_graph, srcFile, fileNameSanitize(current_thread), thread_interventions);
+//		
+//		                // prepare and write page networks
+//		                page_interventions.addAll(thread_interventions);
+//		                combineNetworks(page_graph,thread_graph);
+//		                writeUCINET_File(page_graph, srcFile, fileNameSanitize(current_page), page_interventions);
+//		                
+//		                
+//		                // prepare and write archive networks
+//		                archive_interventions.addAll(page_interventions);
+//		                combineNetworks(archive_graph,page_graph);
+//		                writeUCINET_File(archive_graph, srcFile, "archive", archive_interventions);
+//		
+//		                current_page = null;
+//		                current_thread = null;
+//		
+//		                break;
+//		            }
+//	        	} catch(Exception e)	{
+//	        		e.printStackTrace();
+//	        	}
+//	
+//	
+//	            
+//	            intervention_attributes_temp = all_interventions.pollFirst();
+//	
+//	            in_thread = intervention_attributes_temp.thread;
+//	            in_page = intervention_attributes_temp.page;
+//	            
+//	            if(current_page == null)
+//	            {
+//	                current_page = new String(intervention_attributes_temp.page);
+//	                archive_pages.add(new String(fileNameSanitize(in_page)));
+//	            }
+//	            if(current_thread == null)
+//	            {
+//	                current_thread = new String(intervention_attributes_temp.thread);
+//	                page_threads.add(new String(fileNameSanitize(in_thread)));
+//	            }
+//	            
+//	            if(in_page.compareTo(current_page) != 0)
+//	            {
+//	                try {
+//						writePageThread_File(page_threads, current_page, srcFile);
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//	                archive_threads.addAll(page_threads);
+//	                archive_pages.add(new String(fileNameSanitize(in_page)));
+//	                page_threads.clear();
+//	            }
+//	
+//	            if(in_thread.compareTo(current_thread)!= 0)
+//	            {
+//	                page_threads.add(fileNameSanitize(in_thread));      // add thread to page_threads
+//	                thread_graph = buildGraph(thread_interventions);    // build thread network
+//	                combineNetworks(page_graph, thread_graph);          // add thread network to page network
+//	                page_interventions.addAll(thread_interventions);    // add all thread interventions to page interventions
+//	
+//	                // write thread UCINET file
+//	                try {
+//						writeUCINET_File(thread_graph, srcFile, fileNameSanitize(current_thread), thread_interventions);
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//	                
+//	                // clear thread interventions
+//	                thread_interventions.clear();
+//	
+//	                // add new intervention to cleared list and reset thread identifier
+//	                thread_interventions.add(new InterventionAttributes(intervention_attributes_temp));
+//	                current_thread = new String(in_thread);
+//	            }
+//	            else
+//	            {
+//	                // add intervention to thread interventions
+//	                thread_interventions.add(new InterventionAttributes(intervention_attributes_temp));
+//	            }
+//	
+//	            if(in_page.compareTo(current_page) != 0)
+//	            {
+//	                // prepare page file
+//	                try {
+//						writeUCINET_File(page_graph, srcFile , fileNameSanitize(current_page) ,page_interventions);
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//	
+//	                combineNetworks(archive_graph,page_graph);
+//	                page_graph = new DirectedSparseGraph<String,Edge>();
+//	
+//	                archive_interventions.addAll(page_interventions);
+//	                page_interventions.clear();
+//	
+//	                current_page = new String(in_page);
+//	            }
 	        
+	        String file_separator = "/";
+	        
+	    try	{
 	        while(true)
 	        {
-	        	try{
-		            if(all_interventions.isEmpty())
-		            {
-		                // write page_threads
-		                writePageThread_File(page_threads,"page",srcFile);
-		                // write archive_pages
-		                writePageThread_File(archive_pages, "archive_pages", srcFile);
-		                // write archive_threads
-		                writePageThread_File(archive_threads, "archive", srcFile);
-		
-		                // prepare and write thread networks
-		                thread_graph = buildGraph(thread_interventions);
-		                writeUCINET_File(thread_graph, srcFile, current_thread, thread_interventions);
-		
-		                // prepare and write page networks
-		                page_interventions.addAll(thread_interventions);
-		                combineNetworks(page_graph,thread_graph);
-		                writeUCINET_File(page_graph, srcFile, current_page, page_interventions);
-		                
-		                
-		                // prepare and write archive networks
-		                archive_interventions.addAll(page_interventions);
-		                combineNetworks(archive_graph,page_graph);
-		                writeUCINET_File(archive_graph, srcFile, "archive", archive_interventions);
-		
-		                current_page = null;
-		                current_thread = null;
-		
-		                break;
-		            }
-	        	} catch(Exception e)	{
-	        		e.printStackTrace();
-	        	}
-	
-	
+	            if(all_interventions.isEmpty())
+	            {
+	                // write page_threads
+	                writePageThread_File(page_threads, current_page, "page_threads"+file_separator);
+	                // write archive_pages
+	                writePageThread_File(archive_pages, "archive_pages", "archive"+file_separator);
+	                // write archive_threads
+	                writePageThread_File(archive_threads,"archive_threads","archive"+file_separator);
+
+	                // prepare and write thread networks
+	                thread_graph = buildGraph(thread_interventions);
+	                writeUCINET_File(thread_graph,"thread"+file_separator,current_thread,thread_interventions);
+
+	                // prepare and write page networks
+	                page_interventions.addAll(thread_interventions);
+	                combineNetworks(page_graph,thread_graph);
+	                writeUCINET_File(page_graph,"page"+file_separator,current_page,page_interventions);
+	                
+	                // prepare and write archive networks
+	                archive_interventions.addAll(page_interventions);
+	                combineNetworks(archive_graph,page_graph);
+	                writeUCINET_File(archive_graph,"archive"+file_separator,"archive",archive_interventions);
+
+	                current_page = null;
+	                current_thread = null;
+
+	                break;
+	            }
+
+
 	            
 	            intervention_attributes_temp = all_interventions.pollFirst();
-	
+
 	            in_thread = intervention_attributes_temp.thread;
 	            in_page = intervention_attributes_temp.page;
-	            
+
 	            if(current_page == null)
 	            {
 	                current_page = new String(intervention_attributes_temp.page);
@@ -190,36 +294,29 @@ public class WikiGraph
 	                current_thread = new String(intervention_attributes_temp.thread);
 	                page_threads.add(new String(fileNameSanitize(in_thread)));
 	            }
+
 	            
 	            if(in_page.compareTo(current_page) != 0)
 	            {
-	                try {
-						writePageThread_File(page_threads, current_page, srcFile);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+	                writePageThread_File(page_threads,current_page,"page_threads" + file_separator);
 	                archive_threads.addAll(page_threads);
 	                archive_pages.add(new String(fileNameSanitize(in_page)));
 	                page_threads.clear();
 	            }
-	
+
 	            if(in_thread.compareTo(current_thread)!= 0)
 	            {
 	                page_threads.add(fileNameSanitize(in_thread));      // add thread to page_threads
 	                thread_graph = buildGraph(thread_interventions);    // build thread network
 	                combineNetworks(page_graph, thread_graph);          // add thread network to page network
 	                page_interventions.addAll(thread_interventions);    // add all thread interventions to page interventions
-	
+
 	                // write thread UCINET file
-	                try {
-						writeUCINET_File(thread_graph, srcFile, current_thread, thread_interventions);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+	                writeUCINET_File(thread_graph,"thread"+file_separator,current_thread,thread_interventions);
 	                
 	                // clear thread interventions
 	                thread_interventions.clear();
-	
+
 	                // add new intervention to cleared list and reset thread identifier
 	                thread_interventions.add(new InterventionAttributes(intervention_attributes_temp));
 	                current_thread = new String(in_thread);
@@ -229,28 +326,25 @@ public class WikiGraph
 	                // add intervention to thread interventions
 	                thread_interventions.add(new InterventionAttributes(intervention_attributes_temp));
 	            }
-	
+
 	            if(in_page.compareTo(current_page) != 0)
 	            {
 	                // prepare page file
-	                try {
-						writeUCINET_File(page_graph, srcFile , current_page ,page_interventions);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	
+	                writeUCINET_File(page_graph,"page"+file_separator,current_page,page_interventions);
+
 	                combineNetworks(archive_graph,page_graph);
 	                page_graph = new DirectedSparseGraph<String,Edge>();
-	
+
 	                archive_interventions.addAll(page_interventions);
 	                page_interventions.clear();
-	
+
 	                current_page = new String(in_page);
 	            }
-	        
+	        }
 
-        } 
+        } catch(Exception e)	{
+        	System.out.println();
+        }
         
     }
     
@@ -378,23 +472,147 @@ public class WikiGraph
         return intermediate;
 
     }
-    private void writeUCINET_File(DirectedSparseGraph<String,Edge> graph, GcsFilename srcFile, String destFile, ArrayList<InterventionAttributes> interventions) throws IOException
+//    private void writeUCINET_File(DirectedSparseGraph<String,Edge> graph, GcsFilename srcFile, String destFile, ArrayList<InterventionAttributes> interventions) throws IOException
+//    {
+//    	
+//        //BufferedWriter out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_location) + ".txt"));
+//        Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
+//		GcsFileOptions options = optionsBuild.build();
+//		
+//		GcsFilename outFile = new GcsFilename(BUCKET_NAME, destFile + ".txt");
+//
+//		outputChannel = service.createOrReplace(outFile,
+//				options);
+//		
+//
+//		oout = new ObjectOutputStream(
+//				Channels.newOutputStream(outputChannel));
+//		
+//		//BufferedReader bf = new BufferedReader(red);
+//		
+//        HashMap<String,UserAttributes> users = new HashMap<String,UserAttributes>();
+//
+//        InterventionAttributes intervention_temp;
+//        UserAttributes user_temp;
+//
+//        ArrayList<String> all_users = new ArrayList<String>();
+//        Iterator<String> all_users_iterate = null;
+//
+//        for(int i=0;i<interventions.size();i++)
+//        {
+//            intervention_temp = interventions.get(i);
+//            if(users.containsKey(intervention_temp.user))
+//            {
+//                user_temp = users.get(intervention_temp.user);
+//                user_temp.char_count = user_temp.char_count + intervention_temp.char_count;
+//                user_temp.word_count = user_temp.word_count + intervention_temp.word_count;
+//                user_temp.post_count++;
+//                users.put(user_temp.name, user_temp);
+//            }
+//            else
+//            {
+//                users.put(intervention_temp.user, new UserAttributes(intervention_temp.user,1,intervention_temp.word_count,intervention_temp.char_count));
+//            }
+//        }
+//
+//        for(int i = 0; i<interventions.size(); i++)
+//        {
+//            if(all_users.contains(interventions.get(i).user))
+//            {
+//                continue;
+//            }
+//            else
+//            {
+//                all_users.add(interventions.get(i).user);
+//            }
+//        }
+//
+//        oout.writeChars("DL"); oout.writeChar('\n');
+//        oout.writeChars(String.format("N=%d",all_users.size())); oout.writeChar('\n');
+//        oout.writeChars("FORMAT = EDGELIST1"); oout.writeChar('\n');
+//        oout.writeChars("ROW LABELS:"); oout.writeChar('\n');
+//
+//        for(int i=0; i < all_users.size() ;i++)
+//        {
+//        	oout.writeChars(all_users.get(i));
+//        	oout.writeChar('\n');
+//        }
+//        oout.writeChars("DATA:"); oout.writeChar('\n');
+//        for(int i=0; i<all_users.size();i++)
+//        {
+//            for(int j=0; j<all_users.size();j++)
+//            {
+//                if(null != graph.findEdge(all_users.get(i),all_users.get(j)))
+//                {
+//                	oout.writeChars(String.format("%d %d %f", (i+1),(j+1),graph.findEdge(all_users.get(i),all_users.get(j)).weight));
+//                	oout.writeChar('\n');
+//                }
+//            }
+//        }
+//
+//        oout.close();
+//
+//        outFile = new GcsFilename(BUCKET_NAME, graphFile+"_attributes.txt");
+//
+//		outputChannel = service.createOrReplace(outFile,
+//				options);
+//
+//		oout = new ObjectOutputStream(
+//				Channels.newOutputStream(outputChannel));
+//        
+//        //out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_location)+"_attributes.txt"));
+//
+//        oout.writeChars("*node data"); oout.writeChar('\n');
+//        oout.writeChars("ID\tPost-count\tWord-count\tCharacter-count"); oout.writeChar('\n');
+//        for(int i=0;i<all_users.size();i++)
+//        {
+//            user_temp = users.get(all_users.get(i));
+//            oout.writeChars(String.format("%s\t%d\t%d\t%d",all_users.get(i),user_temp.getPostCount(),user_temp.getWordCount(),user_temp.getCharCount()));
+//            oout.write('\n');
+//        }
+//        oout.flush();
+//        oout.close();
+//
+//        
+//    }
+//    private void writePageThread_File(ArrayList<String> page_threads, String current_page, GcsFilename srcName) throws IOException
+//    {
+//
+//        //BufferedWriter out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_page) + "_threads.txt"));
+//    	Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
+//		GcsFileOptions options = optionsBuild.build();
+//		
+//		GcsFilename outFile = new GcsFilename(BUCKET_NAME, fileNameSanitize(current_page) + "_threads.txt");
+//
+//		outputChannel = service.createOrReplace(outFile,
+//				options);
+//
+//		oout = new ObjectOutputStream(
+//				Channels.newOutputStream(outputChannel));
+//    	
+//        for(int i=0; i<page_threads.size();i++)
+//        {
+//            oout.writeChars(page_threads.get(i));
+//            oout.write('\n');
+//        }
+//        oout.flush();
+//        oout.close();
+//    }
+    
+    private void writeUCINET_File(DirectedSparseGraph<String,Edge> graph, String directory, String current_location, ArrayList<InterventionAttributes> interventions) throws IOException
     {
-    	
         //BufferedWriter out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_location) + ".txt"));
         Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 		GcsFileOptions options = optionsBuild.build();
 		
-		GcsFilename outFile = new GcsFilename(BUCKET_NAME, destFile + ".txt");
+		GcsFilename outFile = new GcsFilename(BUCKET_NAME, directory + fileNameSanitize(current_location) + ".txt");
 
 		outputChannel = service.createOrReplace(outFile,
 				options);
 
 		oout = new ObjectOutputStream(
 				Channels.newOutputStream(outputChannel));
-		
-		//BufferedReader bf = new BufferedReader(red);
-		
+        
         HashMap<String,UserAttributes> users = new HashMap<String,UserAttributes>();
 
         InterventionAttributes intervention_temp;
@@ -439,8 +657,8 @@ public class WikiGraph
 
         for(int i=0; i < all_users.size() ;i++)
         {
-        	oout.writeChars(all_users.get(i));
-        	oout.writeChar('\n');
+            oout.writeChars(all_users.get(i));
+            oout.writeChar('\n');
         }
         oout.writeChars("DATA:"); oout.writeChar('\n');
         for(int i=0; i<all_users.size();i++)
@@ -449,57 +667,61 @@ public class WikiGraph
             {
                 if(null != graph.findEdge(all_users.get(i),all_users.get(j)))
                 {
-                	oout.writeChars(String.format("%d %d %f", (i+1),(j+1),graph.findEdge(all_users.get(i),all_users.get(j)).weight));
-                	oout.writeChar('\n');
+                    oout.writeChars(String.format("%d %d %f", (i+1),(j+1),graph.findEdge(all_users.get(i),all_users.get(j)).weight));
+                    oout.writeChar('\n');
                 }
             }
         }
-
+        oout.flush();
         oout.close();
 
-        outFile = new GcsFilename(BUCKET_NAME, graphFile+"_attributes.txt");
+        //out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_location)+"_attributes.txt"));
+
+        outFile = new GcsFilename(BUCKET_NAME, directory + fileNameSanitize(current_location)+"_attributes.txt");
 
 		outputChannel = service.createOrReplace(outFile,
 				options);
 
 		oout = new ObjectOutputStream(
 				Channels.newOutputStream(outputChannel));
-        
-        //out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_location)+"_attributes.txt"));
-
+		
         oout.writeChars("*node data"); oout.writeChar('\n');
         oout.writeChars("ID\tPost-count\tWord-count\tCharacter-count"); oout.writeChar('\n');
         for(int i=0;i<all_users.size();i++)
         {
             user_temp = users.get(all_users.get(i));
-            oout.writeBytes(String.format("%s\t%d\t%d\t%d",all_users.get(i),user_temp.getPostCount(),user_temp.getWordCount(),user_temp.getCharCount()));
-            oout.write('\n');
+            oout.writeChars(String.format("%s\t%d\t%d\t%d",all_users.get(i),user_temp.getPostCount(),user_temp.getWordCount(),user_temp.getCharCount()));
+            oout.writeChar('\n');
         }
+        oout.flush();
         oout.close();
 
         
     }
-    private void writePageThread_File(ArrayList<String> page_threads, String current_page, GcsFilename srcName) throws IOException
+    
+    private void writePageThread_File(ArrayList<String> page_threads, String current_page, String directory) throws IOException
     {
 
         //BufferedWriter out_file = new BufferedWriter(new FileWriter(directory + fileNameSanitize(current_page) + "_threads.txt"));
-    	Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
+        
+        Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 		GcsFileOptions options = optionsBuild.build();
 		
-		GcsFilename outFile = new GcsFilename(BUCKET_NAME, fileNameSanitize(current_page) + "_threads.txt");
+		GcsFilename outFile = new GcsFilename(BUCKET_NAME, directory + fileNameSanitize(current_page) + "_threads.txt");
 
 		outputChannel = service.createOrReplace(outFile,
 				options);
 
 		oout = new ObjectOutputStream(
 				Channels.newOutputStream(outputChannel));
-    	
+        
+        
         for(int i=0; i<page_threads.size();i++)
         {
-            oout.writeBytes(page_threads.get(i));
-            oout.write('\n');
+            oout.writeChars(page_threads.get(i));
+            oout.writeChar('\n');
         }
-
+        oout.flush();
         oout.close();
     }
     

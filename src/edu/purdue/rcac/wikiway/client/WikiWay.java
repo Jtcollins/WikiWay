@@ -127,7 +127,7 @@ public class WikiWay implements EntryPoint {
 				int select = lb.getSelectedIndex();
 				String selected = lb.getValue(select);
 				compileButton.setEnabled(false);
-				status.setText("Compiling...");
+				status.setText("Compiling... This may take a few minutes.");
 				dialogBox.hide();
 				progressBox.setVisible(true);
 				progressBox.center();

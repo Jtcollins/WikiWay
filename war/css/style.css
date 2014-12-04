@@ -405,6 +405,16 @@
 
 /* Box */
 
+/** Most GWT widgets already have a style name defined */
+.gwt-DialogBox {
+  width: 400px;
+}
+
+.dialogVPanel {
+  margin: 5px;
+}
+
+/*
 	.box {
 		border-radius: 5px;
 		border: solid 2px #e4e4e4;
@@ -423,7 +433,7 @@
 			border-radius: 0;
 			padding: 0;
 		}
-
+*/
 /* Icon */
 
 	.icon {
@@ -1082,11 +1092,3 @@
 					color: inherit;
 				}
 
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
-}
-
-.dialogVPanel {
-  margin: 5px;
-}
