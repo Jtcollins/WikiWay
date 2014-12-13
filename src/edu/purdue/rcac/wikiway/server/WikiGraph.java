@@ -20,10 +20,12 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.nio.channels.Channels;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Queue;
 import java.util.zip.ZipOutputStream;
 
 import com.google.appengine.tools.cloudstorage.GcsFileOptions;
@@ -48,8 +50,10 @@ public class WikiGraph
 
 	private String graphFile;
 	private String[] finalFile;
-	private Object[] topUser;
-	//private String bucketName;
+	public Queue<ArrayList> topUsers;
+	public int nodes;
+	public int numEdits;
+	public Date firstRev; 
     
     public String[] getOutputLocation() {
 		return finalFile;
@@ -65,6 +69,7 @@ public class WikiGraph
     	this.finalFile = new String[2];
     	this.finalFile[0] = BUCKET_NAME;
         this.finalFile[1] = graphName+ ".txt";
+        this.numEdits = 0;
     	service = gcsService;
     	this.srcFile = sourceFile;
     	
@@ -631,6 +636,7 @@ public class WikiGraph
                 user_temp.word_count = user_temp.word_count + intervention_temp.word_count;
                 user_temp.post_count++;
                 users.put(user_temp.name, user_temp);
+                this.numEdits++;
             }
             else
             {
@@ -649,7 +655,9 @@ public class WikiGraph
                 all_users.add(interventions.get(i).user);
             }
         }
-
+        this.nodes = all_users.size();
+        
+        
         oout.writeChars("DL"); oout.writeChar('\n');
         oout.writeChars(String.format("N=%d",all_users.size())); oout.writeChar('\n');
         oout.writeChars("FORMAT = EDGELIST1"); oout.writeChar('\n');

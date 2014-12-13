@@ -7,6 +7,7 @@ import edu.purdue.rcac.wikiway.shared.FieldVerifier;
 
 
 
+
 //import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -114,8 +115,6 @@ public class WikiWay implements EntryPoint {
 		VerticalPanel resultVPanel = new VerticalPanel();
 		resultsBox.setText("Results");
 		resultVPanel.add(downloadButton);
-		nodes.setText("Nodes: ");
-		topC.setText("Top Contributor: ");
 		final Button resetButton = new Button("Close");
 		resultVPanel.add(nodes);
 		resultVPanel.add(topC);
@@ -132,19 +131,22 @@ public class WikiWay implements EntryPoint {
 				progressBox.setVisible(true);
 				progressBox.center();
 				status.setVisible(true);
-				greetingService.makeTxt(selected, new AsyncCallback<String[]>()	{
+				greetingService.makeTxt(selected, new AsyncCallback<Object[]>()	{
 
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
 						
 					}
 
-					public void onSuccess(String[] output) {
+					public void onSuccess(Object[] output) {
 						// TODO Auto-generated method stub
 						progressBox.hide();
 						resultsBox.center();
 						compileButton.setVisible(false);
-						outputLocation = output;
+						outputLocation[0] = (String) output[0];
+						outputLocation[1] = (String) output[1];
+						nodes.setText("Nodes: " + (String) output[2]);
+						topC.setText("Top Contributor: "  + (String) output[3]);
 						downloadButton.setVisible(true);
 						downloadButton.setFocus(true);
 						topC.setVisible(true);

@@ -67,7 +67,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 				.replaceAll(">", "&gt;");
 	}
 
-	public String[] makeTxt(String pageName) {
+	public Object[] makeTxt(String pageName) {
 		try {
 			final GcsService gcsService = GcsServiceFactory
 					.createGcsService(RetryParams.getDefaultInstance());
@@ -79,9 +79,11 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			//GcsFilename deletion = new GcsFilename("processbucket" ,outputName);
 			//gcsService.delete(deletion);
 			ResultXML xml = new ResultXML(pageName, gcsService);
+			
 			TalkProcessor tp = new TalkProcessor();
 			tp.setOutputFile(outputName);
 			tp.process(xml.getOutput(), gcsService);
+			
 			gcsService.delete(xml.getOutput());
 			status = "Compiling Graph";
 			System.out.println(status);
@@ -90,7 +92,16 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			status = "Preparing Analytics";
 			System.out.println(status);
 			gcsService.delete(tp.getOutputFile());
-			return graph.getOutputLocation();
+			
+			Object[] output = new Object[6];
+			output[0] = graph.getOutputLocation()[0];
+			output[1] = graph.getOutputLocation()[1];
+			output[2] = graph.nodes;
+			output[3] = graph.topUsers;
+			output[4] = graph.numEdits;
+			output[5] = graph.firstRev;
+			
+			return output;
 			//return status;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
