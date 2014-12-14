@@ -1,2 +1,3 @@
 # Module wikiway
 # RPC service class, partial path of RPC policy file
+edu.purdue.rcac.wikiway.client.GreetingService, E25A4145C96D2E52A6ABA56F2D2DCDBC.gwt.rpc

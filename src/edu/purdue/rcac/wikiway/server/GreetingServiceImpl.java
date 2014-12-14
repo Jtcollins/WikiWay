@@ -27,6 +27,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	String pageSelected;
 	String outputLoc;
 	String status;
+	public WikiGraph graph;
 	public ArrayList<String> searchResults;
 	
 	public ArrayList<String> getResults()	{
@@ -67,7 +68,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 				.replaceAll(">", "&gt;");
 	}
 
-	public Object[] makeTxt(String pageName) {
+	public String[] makeTxt(String pageName) {
 		try {
 			final GcsService gcsService = GcsServiceFactory
 					.createGcsService(RetryParams.getDefaultInstance());
@@ -87,19 +88,18 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			gcsService.delete(xml.getOutput());
 			status = "Compiling Graph";
 			System.out.println(status);
-			WikiGraph graph = new WikiGraph(gcsService, tp.getOutputFile(), pageName);
+			this.graph = new WikiGraph(gcsService, tp.getOutputFile(), pageName);
 			//gcsService.delete(tp.getOutputFile());
 			status = "Preparing Analytics";
 			System.out.println(status);
 			gcsService.delete(tp.getOutputFile());
 			
-			Object[] output = new Object[6];
+			String[] output = new String[4];
 			output[0] = graph.getOutputLocation()[0];
 			output[1] = graph.getOutputLocation()[1];
-			output[2] = graph.nodes;
-			output[3] = graph.topUsers;
-			output[4] = graph.numEdits;
-			output[5] = graph.firstRev;
+			
+			output[2] = graph.topUsers.toString();
+			output[3] = graph.firstRev.toString();
 			
 			return output;
 			//return status;
@@ -112,6 +112,13 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 		}
 		System.out.println("makeTxt failed");
 		return null;
+	}
+	
+	public int[] data()	{
+		int[] data = new int[2];
+		data[0] = this.graph.nodes;
+		data[1] = this.graph.numEdits;
+		return data;
 	}
 
 	public String getStatus() {

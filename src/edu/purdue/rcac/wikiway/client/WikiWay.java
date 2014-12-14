@@ -57,10 +57,11 @@ public class WikiWay implements EntryPoint {
 		final Button searchButton = new Button("Search");
 		final Button compileButton = new Button("Compile");
 		final Button downloadButton = new Button("Download");
+		final ListBox topC = new ListBox();
 		final TextBox searchField = new TextBox();
 		final TextBox status = new TextBox();
 		final TextBox nodes = new TextBox();
-		final TextBox topC = new TextBox();
+		final TextBox firstRev = new TextBox();
 		status.setVisible(false);
 		searchField.setText("Search Parameters");
 		final Label errorLabel = new Label();
@@ -131,14 +132,14 @@ public class WikiWay implements EntryPoint {
 				progressBox.setVisible(true);
 				progressBox.center();
 				status.setVisible(true);
-				greetingService.makeTxt(selected, new AsyncCallback<Object[]>()	{
+				greetingService.makeTxt(selected, new AsyncCallback<String[]>()	{
 
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
 						
 					}
 
-					public void onSuccess(Object[] output) {
+					public void onSuccess(String[] output) {
 						// TODO Auto-generated method stub
 						progressBox.hide();
 						resultsBox.center();
@@ -146,7 +147,9 @@ public class WikiWay implements EntryPoint {
 						outputLocation[0] = (String) output[0];
 						outputLocation[1] = (String) output[1];
 						nodes.setText("Nodes: " + (String) output[2]);
-						topC.setText("Top Contributor: "  + (String) output[3]);
+						firstRev.setText("First Revision"  + (String) output[3]);
+						
+						
 						downloadButton.setVisible(true);
 						downloadButton.setFocus(true);
 						topC.setVisible(true);
