@@ -12,6 +12,7 @@ public interface GreetingServiceAsync {
 			throws IllegalArgumentException;
 	void getResults(AsyncCallback<ArrayList> asyncCallback)
 			throws IllegalArgumentException;
-	void makeTxt(String pageName, AsyncCallback<String[]> callback);
+	void makeTxt(String pageName, int id, AsyncCallback<ArrayList> callback);
 	void data(AsyncCallback<int[]> callback);
+	void delete(int id, AsyncCallback<Boolean> callback);
 }	

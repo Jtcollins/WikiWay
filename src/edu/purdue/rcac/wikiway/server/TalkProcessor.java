@@ -16,6 +16,7 @@ import java.nio.channels.Channels;
 //import java.text.DateFormat;
 //import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 //import java.util.Date;
 import java.util.Deque;
 import java.util.Iterator;
@@ -64,6 +65,7 @@ public class TalkProcessor {
 	private ObjectOutputStream oout;
 
 	private String outputFile = "talkoutput.txt";
+	public String firstRevision;
 
 	public GcsFilename getOutputFile() {
 		return outFile;
@@ -138,6 +140,8 @@ public class TalkProcessor {
 
 		GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(
 				srcFile, 0, 1024 * 1024);
+		
+		
 
 		try (ObjectInputStream oin = new ObjectInputStream( Channels.newInputStream(readChannel))) {
 
@@ -561,7 +565,8 @@ public class TalkProcessor {
 			if (minutestring.length() != 2)
 				minutestring = "0" + minutestring;
 			datestring = datestring.concat(minutestring);
-
+			
+			
 			return datestring;
 		}
 
@@ -644,6 +649,7 @@ public class TalkProcessor {
 		public wikiDate date;
 		public wikiThread thread;
 		public String page;
+		public String firstRev;
 
 		public wikiIntervention() {
 
@@ -855,15 +861,22 @@ public class TalkProcessor {
 						}
 
 					}
-
-					if (i <= 0) {
-						temp = new wikiDate(tempStr);
-					} else {
-						tempWikiString = new wikiString();
-						tempWikiString.setContent(tempStr.substring(0, i));
-						tagstack2.addLast(tempWikiString);
-						temp = new wikiDate(tempStr.substring(i + 1));
-					}
+					try	{
+						if (i <= 0) {
+							temp = new wikiDate(tempStr);
+							if(Integer.parseInt((String) temp.toString()) < Integer.parseInt(this.firstRevision))	{
+								this.firstRevision = temp.toString();
+							}
+						} else {
+							tempWikiString = new wikiString();
+							tempWikiString.setContent(tempStr.substring(0, i));
+							tagstack2.addLast(tempWikiString);
+							temp = new wikiDate(tempStr.substring(i + 1));
+							if(Integer.parseInt((String) temp.toString()) < Integer.parseInt(this.firstRevision))	{
+								this.firstRevision = temp.toString();
+							}
+						}
+					} catch(Exception e)	{}
 				}
 			}
 			if (temp.getClass() == wikiUser.class) // delete duplicate user

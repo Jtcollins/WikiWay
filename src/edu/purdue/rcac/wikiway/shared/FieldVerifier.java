@@ -25,7 +25,6 @@ import java.util.Hashtable;
 public class FieldVerifier {
 	
 	public static int counter = 0;
-	//private static Hashtable<String, Integer> hTable;
 	/**
 	 * Verifies that the specified name is valid for our service.
 	 * 
@@ -45,9 +44,9 @@ public class FieldVerifier {
 		//hTable.put(name, counter);
 		return name.length() > 3;
 	}
+	public static int newProcessNum()	{
+		counter++;
+		return counter;
+	}
 	
-	/*
-	public static int processNumber(String page)	{
-		return hTable.get(page);
-	}*/
 }

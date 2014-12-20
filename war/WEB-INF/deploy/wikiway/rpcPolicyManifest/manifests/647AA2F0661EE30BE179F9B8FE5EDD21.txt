@@ -1,0 +1,2 @@
+serviceClass: edu.purdue.rcac.wikiway.client.GreetingService
+path: 49E91B1387AD704C52930F4254EA80FD.gwt.rpc

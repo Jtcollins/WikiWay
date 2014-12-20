@@ -50,10 +50,11 @@ public class WikiGraph
 
 	private String graphFile;
 	private String[] finalFile;
-	public Queue<ArrayList> topUsers;
+	public ArrayList topUsers;
 	public int nodes;
 	public int numEdits;
-	public Date firstRev; 
+	public Date firstRev;
+	public int id;
     
     public String[] getOutputLocation() {
 		return finalFile;
@@ -63,15 +64,15 @@ public class WikiGraph
 		graphFile = file;
 	}
 
-    public WikiGraph(GcsService gcsService, GcsFilename sourceFile, String graphName)	{
+    public WikiGraph(GcsService gcsService, GcsFilename sourceFile, String graphName, int id)	{
     	System.out.println("Graphing now " + sourceFile.getObjectName());
     	//this.graphFile = graphName;
     	this.finalFile = new String[2];
     	this.finalFile[0] = BUCKET_NAME;
-        this.finalFile[1] = graphName+ ".txt";
         this.numEdits = 0;
     	service = gcsService;
     	this.srcFile = sourceFile;
+    	this.id = id;
     	
     	ArrayList<String> page_threads = new ArrayList<String>();
         ArrayList<String> archive_threads = new ArrayList<String>();
@@ -109,13 +110,14 @@ public class WikiGraph
 	        	Builder optionsBuild = new GcsFileOptions.Builder().acl("public-read");
 	    		GcsFileOptions options = optionsBuild.build();
 	    		
-	    		GcsFilename testFile = new GcsFilename(BUCKET_NAME, "test" + ".txt");
+	    		GcsFilename testFile = new GcsFilename(BUCKET_NAME, ""+id+"/test");
 
 	    		GcsOutputChannel testoutChannel = service.createOrReplace(testFile,
 	    				options);
 
 	    		ObjectOutputStream tout = new ObjectOutputStream(
 	    				Channels.newOutputStream(testoutChannel));
+	    		//tout.close();
 				while( (in_line = in_file.readLine()) != null) // read the verbose file into a Double-ended queue
 				{
 					//System.out.println(in_line);
@@ -256,25 +258,25 @@ public class WikiGraph
 	            if(all_interventions.isEmpty())
 	            {
 	                // write page_threads
-	                writePageThread_File(page_threads, current_page, "page_threads"+file_separator);
+	                writePageThread_File(page_threads, current_page, ""+id+"/page_threads"+file_separator);
 	                // write archive_pages
-	                writePageThread_File(archive_pages, "archive_pages", "archive"+file_separator);
+	                writePageThread_File(archive_pages, "archive_pages", ""+id+"/archive"+file_separator);
 	                // write archive_threads
-	                writePageThread_File(archive_threads,"archive_threads","archive"+file_separator);
+	                writePageThread_File(archive_threads,"archive_threads",""+id+"/archive"+file_separator);
 
 	                // prepare and write thread networks
 	                thread_graph = buildGraph(thread_interventions);
-	                writeUCINET_File(thread_graph,"thread"+file_separator,current_thread,thread_interventions);
+	                writeUCINET_File(thread_graph,""+id+ "/thread"+file_separator,current_thread,thread_interventions);
 
 	                // prepare and write page networks
 	                page_interventions.addAll(thread_interventions);
 	                combineNetworks(page_graph,thread_graph);
-	                writeUCINET_File(page_graph,"page"+file_separator,current_page,page_interventions);
+	                writeUCINET_File(page_graph,""+id+ "/page"+file_separator,current_page,page_interventions);
 	                
 	                // prepare and write archive networks
 	                archive_interventions.addAll(page_interventions);
 	                combineNetworks(archive_graph,page_graph);
-	                writeUCINET_File(archive_graph,"archive"+file_separator,"archive",archive_interventions);
+	                writeUCINET_File(archive_graph,""+id+"/archive"+file_separator, "archive",archive_interventions);
 
 	                current_page = null;
 	                current_thread = null;
@@ -303,7 +305,7 @@ public class WikiGraph
 	            
 	            if(in_page.compareTo(current_page) != 0)
 	            {
-	                writePageThread_File(page_threads,current_page,"page_threads" + file_separator);
+	                writePageThread_File(page_threads,current_page,""+id+"/page_threads" + file_separator);
 	                archive_threads.addAll(page_threads);
 	                archive_pages.add(new String(fileNameSanitize(in_page)));
 	                page_threads.clear();
@@ -317,7 +319,7 @@ public class WikiGraph
 	                page_interventions.addAll(thread_interventions);    // add all thread interventions to page interventions
 
 	                // write thread UCINET file
-	                writeUCINET_File(thread_graph,"thread"+file_separator,current_thread,thread_interventions);
+	                writeUCINET_File(thread_graph,""+id+ file_separator+"thread"+file_separator,current_thread,thread_interventions);
 	                
 	                // clear thread interventions
 	                thread_interventions.clear();
@@ -335,8 +337,10 @@ public class WikiGraph
 	            if(in_page.compareTo(current_page) != 0)
 	            {
 	                // prepare page file
-	                writeUCINET_File(page_graph,"page"+file_separator,current_page,page_interventions);
-
+	                writeUCINET_File(page_graph,""+id+"/page"+file_separator,current_page,page_interventions);
+	                this.nodes = page_graph.getVertexCount();
+	                this.finalFile[1] = ""+id+ "/page/" + current_page+ "_attributes.txt";
+	    	        
 	                combineNetworks(archive_graph,page_graph);
 	                page_graph = new DirectedSparseGraph<String,Edge>();
 
@@ -346,6 +350,9 @@ public class WikiGraph
 	                current_page = new String(in_page);
 	            }
 	        }
+	       
+	        
+	        
 
         } catch(Exception e)	{
         	System.out.println();
@@ -635,6 +642,7 @@ public class WikiGraph
                 user_temp.char_count = user_temp.char_count + intervention_temp.char_count;
                 user_temp.word_count = user_temp.word_count + intervention_temp.word_count;
                 user_temp.post_count++;
+                ArrayList<ArrayList> topCont = new ArrayList();
                 users.put(user_temp.name, user_temp);
                 this.numEdits++;
             }
@@ -655,7 +663,6 @@ public class WikiGraph
                 all_users.add(interventions.get(i).user);
             }
         }
-        this.nodes = all_users.size();
         
         
         oout.writeChars("DL"); oout.writeChar('\n');

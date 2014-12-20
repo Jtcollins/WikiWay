@@ -1,9 +1,16 @@
 package edu.purdue.rcac.wikiway.client;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import edu.purdue.rcac.wikiway.server.*;
 import edu.purdue.rcac.wikiway.shared.FieldVerifier;
+
+
+
+
+
+
 
 
 
@@ -34,6 +41,7 @@ public class WikiWay implements EntryPoint {
 	
 	public ListBox lb = new ListBox();
 	public String[] outputLocation;
+	public final int id = FieldVerifier.newProcessNum();
 	//public File outText;
 	
 	/**
@@ -59,9 +67,10 @@ public class WikiWay implements EntryPoint {
 		final Button downloadButton = new Button("Download");
 		final ListBox topC = new ListBox();
 		final TextBox searchField = new TextBox();
-		final TextBox status = new TextBox();
-		final TextBox nodes = new TextBox();
-		final TextBox firstRev = new TextBox();
+		final Label status = new Label();
+		final Label nodes = new Label();
+		final Label numEdits = new Label();
+		final Label firstRev = new Label();
 		status.setVisible(false);
 		searchField.setText("Search Parameters");
 		final Label errorLabel = new Label();
@@ -97,7 +106,6 @@ public class WikiWay implements EntryPoint {
 		dialogVPanel.add(lb);
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(compileButton);
-		downloadButton.setVisible(false);
 		dialogVPanel.add(closeButton);
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_LEFT);
 		dialogBox.setWidget(dialogVPanel);
@@ -113,12 +121,14 @@ public class WikiWay implements EntryPoint {
 		
 		//Create the Result Dialog box
 		final DialogBox resultsBox = new DialogBox();
+		final Button resetButton = new Button("Close");
 		VerticalPanel resultVPanel = new VerticalPanel();
 		resultsBox.setText("Results");
-		resultVPanel.add(downloadButton);
-		final Button resetButton = new Button("Close");
 		resultVPanel.add(nodes);
+		resultVPanel.add(numEdits);
+		resultVPanel.add(firstRev);
 		resultVPanel.add(topC);
+		resultVPanel.add(downloadButton);
 		resultVPanel.add(resetButton);
 		resultsBox.setWidget(resultVPanel);
 		
@@ -132,27 +142,37 @@ public class WikiWay implements EntryPoint {
 				progressBox.setVisible(true);
 				progressBox.center();
 				status.setVisible(true);
-				greetingService.makeTxt(selected, new AsyncCallback<String[]>()	{
+				greetingService.makeTxt(selected, id, new AsyncCallback<ArrayList>()	{
 
 					public void onFailure(Throwable caught) {
 						// TODO Auto-generated method stub
 						
 					}
 
-					public void onSuccess(String[] output) {
+					public void onSuccess(ArrayList output) {
 						// TODO Auto-generated method stub
+						compileButton.setVisible(false);
 						progressBox.hide();
 						resultsBox.center();
-						compileButton.setVisible(false);
-						outputLocation[0] = (String) output[0];
-						outputLocation[1] = (String) output[1];
-						nodes.setText("Nodes: " + (String) output[2]);
-						firstRev.setText("First Revision"  + (String) output[3]);
+						nodes.setText("Total Nodes: " + output.get(4));
+						numEdits.setText("Number of Posts:  " + output.get(5));
+						//topC.setText("Top Contributors: ");
+						//nodes.setText("Nodes: " + (String) output.get(index));
 						
+						//nodes.setText(output[4]);
+						//numEdits.setText(output[5]);
+						firstRev.setText("First Revision: " + (String) output.get(1));
+						topC.clear();
+						ArrayList topUsers = (ArrayList) output.get(2);
+						for(int i = 0; i < topUsers.size() && i < 10; i++)	{
+							topC.addItem((String) topUsers.get(i));
+						}
 						
+						outputLocation[0] = (String) output.get(0);
+						outputLocation[1] = (String) output.get(1);
 						downloadButton.setVisible(true);
 						downloadButton.setFocus(true);
-						topC.setVisible(true);
+						
 						
 					}
 
@@ -289,7 +309,19 @@ public class WikiWay implements EntryPoint {
 			public void onClick(ClickEvent event) {
 				//links to the final completed graph.
 				Window.open("http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1], "_self", "enabled");
-				
+				greetingService.delete(id, new AsyncCallback<Boolean>()	{
+
+					@Override
+					public void onFailure(Throwable caught) {
+						// TODO Auto-generated method stub
+						
+					}
+
+					@Override
+					public void onSuccess(Boolean result) {
+						// TODO Auto-generated method stub
+						
+					}});
 			}
 			
 		}

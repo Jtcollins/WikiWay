@@ -68,13 +68,14 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 				.replaceAll(">", "&gt;");
 	}
 
-	public String[] makeTxt(String pageName) {
+	public ArrayList makeTxt(String pageName, int id) {
 		try {
 			final GcsService gcsService = GcsServiceFactory
 					.createGcsService(RetryParams.getDefaultInstance());
 			status = "Downloading Data from Wikipedia";
 			String outputName = "talkoutput" + ".txt";
 			System.out.println(status + " pageName " + pageName);
+			ArrayList output = new ArrayList();
 			//ListResult bucketList = new list(WikiGraph.BUCKET_NAME, );
 			pageName.replaceAll(" ", "");
 			//GcsFilename deletion = new GcsFilename("processbucket" ,outputName);
@@ -88,18 +89,17 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 			gcsService.delete(xml.getOutput());
 			status = "Compiling Graph";
 			System.out.println(status);
-			this.graph = new WikiGraph(gcsService, tp.getOutputFile(), pageName);
+			this.graph = new WikiGraph(gcsService, tp.getOutputFile(), pageName, id);
 			//gcsService.delete(tp.getOutputFile());
 			status = "Preparing Analytics";
 			System.out.println(status);
+			output.add(graph.getOutputLocation()[0]);
+			output.add(graph.getOutputLocation()[1]);
+			output.add(graph.topUsers);
+			output.add(tp.firstRevision);
+			output.add(this.graph.nodes);
+			output.add(this.graph.numEdits);
 			gcsService.delete(tp.getOutputFile());
-			
-			String[] output = new String[4];
-			output[0] = graph.getOutputLocation()[0];
-			output[1] = graph.getOutputLocation()[1];
-			
-			output[2] = graph.topUsers.toString();
-			output[3] = graph.firstRev.toString();
 			
 			return output;
 			//return status;
@@ -115,10 +115,22 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements
 	}
 	
 	public int[] data()	{
-		int[] data = new int[2];
-		data[0] = this.graph.nodes;
-		data[1] = this.graph.numEdits;
+		int[] data = new int[0];
+		
 		return data;
+	}
+	
+	public boolean delete(int id)	{
+		try {
+			final GcsService gcsService = GcsServiceFactory
+					.createGcsService(RetryParams.getDefaultInstance());
+			GcsFilename curr = new GcsFilename("graphbucket", "" + id +"/");
+			gcsService.delete(curr);
+			return true;
+		} catch (Exception e)	{
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public String getStatus() {
