@@ -272,6 +272,8 @@ public class WikiGraph
 	                page_interventions.addAll(thread_interventions);
 	                combineNetworks(page_graph,thread_graph);
 	                writeUCINET_File(page_graph,""+id+ "/page"+file_separator,current_page,page_interventions);
+	                this.nodes = page_graph.getVertexCount();
+	                this.finalFile[1] = ""+id+ "/page/" + fileNameSanitize(current_page)+ "_attributes.txt";
 	                
 	                // prepare and write archive networks
 	                archive_interventions.addAll(page_interventions);
@@ -338,8 +340,6 @@ public class WikiGraph
 	            {
 	                // prepare page file
 	                writeUCINET_File(page_graph,""+id+"/page"+file_separator,current_page,page_interventions);
-	                this.nodes = page_graph.getVertexCount();
-	                this.finalFile[1] = ""+id+ "/page/" + current_page+ "_attributes.txt";
 	    	        
 	                combineNetworks(archive_graph,page_graph);
 	                page_graph = new DirectedSparseGraph<String,Edge>();
