@@ -163,6 +163,7 @@ public class TalkProcessor {
 			// out_file = new BufferedWriter(new FileWriter(outputFile));
 
 			page = null;
+			this.firstRevision = "" + Integer.MAX_VALUE;
 
 			while (streamReader.hasNext()) {
 				int event = streamReader.next();
@@ -221,6 +222,10 @@ public class TalkProcessor {
 
 				}
 			}
+			if(Integer.parseInt(this.firstRevision) == Integer.MAX_VALUE)	{
+				firstRevision = "Unknown";
+			}
+				
 			oout.flush();
 			oout.close();
 		}
@@ -566,7 +571,6 @@ public class TalkProcessor {
 				minutestring = "0" + minutestring;
 			datestring = datestring.concat(minutestring);
 			
-			
 			return datestring;
 		}
 
@@ -864,17 +868,11 @@ public class TalkProcessor {
 					try	{
 						if (i <= 0) {
 							temp = new wikiDate(tempStr);
-							if(Integer.parseInt((String) temp.toString()) < Integer.parseInt(this.firstRevision))	{
-								this.firstRevision = temp.toString();
-							}
 						} else {
 							tempWikiString = new wikiString();
 							tempWikiString.setContent(tempStr.substring(0, i));
 							tagstack2.addLast(tempWikiString);
 							temp = new wikiDate(tempStr.substring(i + 1));
-							if(Integer.parseInt((String) temp.toString()) < Integer.parseInt(this.firstRevision))	{
-								this.firstRevision = temp.toString();
-							}
 						}
 					} catch(Exception e)	{}
 				}
@@ -1133,6 +1131,11 @@ public class TalkProcessor {
 					oout.writeBytes(wkI.content.getCharCount() + ",");
 					if (wkI.date != null) {
 						oout.writeBytes(wkI.date.toString());
+						try	{
+							if(Integer.parseInt(wkI.date.toString()) < Integer.parseInt(this.firstRevision))	{
+								this.firstRevision = wkI.date.toString();
+							}
+						} catch (Exception e)	{ }
 					} else {
 						oout.writeBytes("0000MM000000"); // Error time stamp
 					}

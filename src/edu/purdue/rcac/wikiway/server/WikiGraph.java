@@ -20,6 +20,7 @@ import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.nio.channels.Channels;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
@@ -272,14 +273,15 @@ public class WikiGraph
 	                page_interventions.addAll(thread_interventions);
 	                combineNetworks(page_graph,thread_graph);
 	                writeUCINET_File(page_graph,""+id+ "/page"+file_separator,current_page,page_interventions);
-	                this.nodes = page_graph.getVertexCount();
 	                this.finalFile[1] = ""+id+ "/page/" + fileNameSanitize(current_page)+ "_attributes.txt";
 	                
 	                // prepare and write archive networks
 	                archive_interventions.addAll(page_interventions);
 	                combineNetworks(archive_graph,page_graph);
 	                writeUCINET_File(archive_graph,""+id+"/archive"+file_separator, "archive",archive_interventions);
-
+	                
+	                
+	                Collection t = page_graph.getVertices();
 	                current_page = null;
 	                current_thread = null;
 
@@ -644,7 +646,7 @@ public class WikiGraph
                 user_temp.post_count++;
                 ArrayList<ArrayList> topCont = new ArrayList();
                 users.put(user_temp.name, user_temp);
-                this.numEdits++;
+                //this.numEdits++;
             }
             else
             {
@@ -669,7 +671,8 @@ public class WikiGraph
         oout.writeChars(String.format("N=%d",all_users.size())); oout.writeChar('\n');
         oout.writeChars("FORMAT = EDGELIST1"); oout.writeChar('\n');
         oout.writeChars("ROW LABELS:"); oout.writeChar('\n');
-
+        
+        this.nodes = all_users.size();
         for(int i=0; i < all_users.size() ;i++)
         {
             oout.writeChars(all_users.get(i));
@@ -699,7 +702,7 @@ public class WikiGraph
 
 		oout = new ObjectOutputStream(
 				Channels.newOutputStream(outputChannel));
-		
+		this.numEdits = 0;
         oout.writeChars("*node data"); oout.writeChar('\n');
         oout.writeChars("ID\tPost-count\tWord-count\tCharacter-count"); oout.writeChar('\n');
         for(int i=0;i<all_users.size();i++)
@@ -707,6 +710,7 @@ public class WikiGraph
             user_temp = users.get(all_users.get(i));
             oout.writeChars(String.format("%s\t%d\t%d\t%d",all_users.get(i),user_temp.getPostCount(),user_temp.getWordCount(),user_temp.getCharCount()));
             oout.writeChar('\n');
+            this.numEdits += user_temp.getPostCount();
         }
         oout.flush();
         oout.close();

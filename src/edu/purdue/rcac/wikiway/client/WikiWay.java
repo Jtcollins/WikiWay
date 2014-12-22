@@ -65,7 +65,7 @@ public class WikiWay implements EntryPoint {
 		final Button searchButton = new Button("Search");
 		final Button compileButton = new Button("Compile");
 		final Button downloadButton = new Button("Download");
-		final ListBox topC = new ListBox();
+		final HTML topC = new HTML();
 		final TextBox searchField = new TextBox();
 		final Label status = new Label();
 		final Label nodes = new Label();
@@ -102,7 +102,7 @@ public class WikiWay implements EntryPoint {
 		dialogVPanel.addStyleName("dialogVPanel");
 		//dialogVPanel.add(new HTML("<br><b>Results:</b>"));
 		lb.setVisibleItemCount(10);
-		lb.setSize("290px", "210px");
+		lb.setSize("290px", "230px");
 		dialogVPanel.add(lb);
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(compileButton);
@@ -156,16 +156,19 @@ public class WikiWay implements EntryPoint {
 						resultsBox.center();
 						nodes.setText("Total Nodes: " + output.get(4));
 						numEdits.setText("Number of Posts:  " + output.get(5));
-						//topC.setText("Top Contributors: ");
 						//nodes.setText("Nodes: " + (String) output.get(index));
 						
 						//nodes.setText(output[4]);
 						//numEdits.setText(output[5]);
-						firstRev.setText("First Revision: " + (String) output.get(1));
-						topC.clear();
+						firstRev.setText("First Revision: " + (String) output.get(3));
+						//topC.clear();
 						ArrayList topUsers = (ArrayList) output.get(2);
-						for(int i = 0; i < topUsers.size() && i < 10; i++)	{
-							topC.addItem((String) topUsers.get(i));
+						if(topUsers.size() == 2)	{
+							String top = "Top Contributor: " + topUsers.get(0) + "Posts: " + topUsers.get(1);
+							//for(int i = 0; i < topUsers.size() && i < 10; i++)	{
+							//	top = top + i + ": " + (String) topUsers.get(i) + "<br />";
+							//}
+							topC.setHTML(top);
 						}
 						
 						outputLocation[0] = (String) output.get(0);
@@ -202,6 +205,12 @@ public class WikiWay implements EntryPoint {
 				compileButton.setVisible(true);
 				searchButton.setFocus(true);
 				searchField.setText("Search Parameters");
+			}
+		});
+		
+		downloadButton.addClickHandler(new ClickHandler() { 
+			public void onClick(ClickEvent event) {
+				Window.open("http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1], "_self", "enabled");
 			}
 		});
 
@@ -309,6 +318,8 @@ public class WikiWay implements EntryPoint {
 			public void onClick(ClickEvent event) {
 				//links to the final completed graph.
 				Window.open("http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1], "_self", "enabled");
+				
+				/**
 				greetingService.delete(id, new AsyncCallback<Boolean>()	{
 
 					@Override
@@ -322,6 +333,8 @@ public class WikiWay implements EntryPoint {
 						// TODO Auto-generated method stub
 						
 					}});
+					
+					*/
 			}
 			
 		}
@@ -332,8 +345,8 @@ public class WikiWay implements EntryPoint {
 		DownHandler downhandle = new DownHandler();
 		searchButton.addClickHandler(handler);
 		
-		compileButton.addClickHandler(comphandle);
-		downloadButton.addClickHandler(downhandle);
+		//compileButton.addClickHandler(comphandle);
+		//downloadButton.addClickHandler(downhandle);
 		searchField.addKeyUpHandler(handler);
 	}
 }
