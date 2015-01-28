@@ -65,6 +65,7 @@ public class WikiWay implements EntryPoint {
 		final Button searchButton = new Button("Search");
 		final Button compileButton = new Button("Compile");
 		final Button downloadButton = new Button("Download");
+		//final HTML downloadLink = new HTML();
 		final HTML topC = new HTML();
 		final TextBox searchField = new TextBox();
 		final Label status = new Label();
@@ -170,6 +171,8 @@ public class WikiWay implements EntryPoint {
 							//}
 							topC.setHTML(top);
 						}
+						
+						//downloadLink.setHTML("<a href=http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1] +">");
 						
 						outputLocation[0] = (String) output.get(0);
 						outputLocation[1] = (String) output.get(1);
@@ -317,6 +320,8 @@ public class WikiWay implements EntryPoint {
 
 			public void onClick(ClickEvent event) {
 				//links to the final completed graph.
+				String fileInfo1 = outputLocation[0] + "/" + outputLocation[1];
+				String url = GWT.getModuleBaseURL() + "downloadService?fileInfo1=" + fileInfo1;
 				Window.open("http://storage.googleapis.com/" +outputLocation[0] + "/" + outputLocation[1], "_self", "enabled");
 				
 				/**
